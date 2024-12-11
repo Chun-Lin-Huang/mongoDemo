@@ -24,6 +24,7 @@ export class UserController extends Contorller {
 
         const dbResp = await this.service.getAllStudents();
         if (dbResp) {
+            // 用來找問題加入的程式碼
             if (dbResp.length == 0) {
                 res.body = dbResp;
                 res.message = "no data";

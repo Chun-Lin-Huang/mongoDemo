@@ -22,7 +22,7 @@ export class UserService extends Service {
             // 如果有學生資料，對每個學生隨機生成 absences
             if (res && res.length > 0) {
                 res.forEach(student => {
-                    // 隨機生成 absences 值，範圍是 0 到 10
+                    // 隨機生成 absences 值，範圍是 0 到 5
                     student.absences = Math.floor(Math.random() * 6); // 隨機生成 0 到 5 的數字
                 });
             }
