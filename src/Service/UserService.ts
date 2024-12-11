@@ -18,11 +18,20 @@ export class UserService extends Service {
     public async getAllStudents(): Promise<Array<DBResp<Student>> | undefined> {
         try {
             const res: Array<DBResp<Student>> = await studentsModel.find({});
+
+            // 如果有學生資料，對每個學生隨機生成 absences
+            if (res && res.length > 0) {
+                res.forEach(student => {
+                    // 隨機生成 absences 值，範圍是 0 到 10
+                    student.absences = Math.floor(Math.random() * 6); // 隨機生成 0 到 5 的數字
+                });
+            }
+
             return res;
         } catch (error) {
+            console.error("Error in getAllStudents:", error);
             return undefined;
         }
-
     }
 
     /**
@@ -141,10 +150,10 @@ export class UserService extends Service {
 
     /**
      * 刪除一筆用戶
-     * @param id: 用戶_id 
+     * @param userName 
      * @returns 
      */
-    public async deleteById(id: string) {
+    public async deleteByUserName(userName: string) {
 
         const resp: resp<any> = {
             code: 200,
@@ -153,7 +162,7 @@ export class UserService extends Service {
         }
 
         try {
-            const res = await studentsModel.deleteOne({ _id: id });
+            const res = await studentsModel.deleteOne({ userName: userName });
             resp.message = "success";
             resp.body = res;
         } catch (error) {
@@ -164,34 +173,33 @@ export class UserService extends Service {
         return resp;
     }
 
-    /**
-     * 更新一筆用戶
-     * @param id uid
+    /**更新一筆用戶
+     * @param userName 用戶名
      * @param name 新名字
      * @returns 狀態
      */
-    public async updateNameById(id: string, name: string) {
+    public async updateNameByUserName(userName: string, name: string) {
         const resp: resp<DBResp<Student> | undefined> = {
             code: 200,
             message: "",
-            body: undefined
-        }
+            body: undefined,
+        };
 
-        const user = await studentsModel.findById(id)
+        try {
+            const user = await studentsModel.findOne({ userName });
 
-        if (user) {
-            try {
+            if (user) {
                 user.name = name;
                 await user.save();
                 resp.body = user;
                 resp.message = "update success";
-            } catch (error) {
-                resp.code = 500;
-                resp.message = "server error";
+            } else {
+                resp.code = 404;
+                resp.message = "user not found";
             }
-        } else {
-            resp.code = 404;
-            resp.message = "user not found";
+        } catch (error) {
+            resp.code = 500;
+            resp.message = "server error";
         }
 
         return resp;
